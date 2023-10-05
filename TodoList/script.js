@@ -2,6 +2,23 @@
 // anonymous function = function without a function name
 // arrow function = shorter way to write function
 
+fetch("https://jsonplaceholder.typicode.com/todos")
+.then( response => response.json() )
+.then( result => {
+    result.forEach( todo => {
+        document.querySelector("#taskArea").innerHTML += 
+        `<div>
+            <button class="btn btn-light markButton">☑️</button>
+            <span>${todo.title}</span>
+            <button class="btn btn-sm btn-danger deleteButton">Remove</button>
+            <hr>
+        </div>
+        `;
+    })
+}
+)
+.catch(error => console.log('error', error));
+
 
 document.querySelector("#addTask").addEventListener("click", () => {
 
