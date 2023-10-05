@@ -42,7 +42,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
+        import { getFirestore, collection, onSnapshot, addDoc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
       
@@ -64,7 +64,7 @@
         // Initialize Cloud Firestore and get a reference to the service
         const db = getFirestore(app);
 
-        onSnapshot(collection(db, "students"), snapshot => {
+        onSnapshot(query(collection(db, "students"), orderBy("lastname", "asc")), snapshot => {
             document.querySelector("#tableArea").innerHTML = "";
             snapshot.forEach(student =>{
                 let studentRow =
