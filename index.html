@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>BASE404 Group Chat</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -12,50 +12,42 @@
     />
 </head>
 <body>
-    <div class="container p-5 my-5 shadow">
-        <h1 class="fw-bold">Add New Student Record</h1>
-            <label for="firstname">First Name:</label>
-            <input id="firstname" type="text" class="form-control" required>
-            <label for="lastname">Last Name:</label>
-            <input id="lastname" type="text" class="form-control" required>
-            <label for="batch">Batch:</label>
-            <input id="batch" type="number" class="form-control" min="1" required>
-            <label for="grade">Grade:</label>
-            <input id="grade" type="number" class="form-control" min="1" max="100" required>
-            <button id="newStudentForm" class="btn btn-dark mt-3">+ Add Record</button>
+    
+    <main class="container p-5 mt-5 shadow">
+        <h1 class="fw-bold mb-4">💬 BASE404 Group Chat</h1>
+        <label for="user_name">Name:</label>
+        <input type="text" id="user_name" class="form-control" placeholder="Enter your name here...">
+
+        <!-- Chat section -->
+        <section>
+            <div class="card mt-4" style="overflow-y: scroll; height: 580px;">
+                <div class="card-body" id="message_area">
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- Message section -->
+        <textarea placeholder="Write your message here..." id="message_content" class="mt-3 form-control"></textarea>
+        <button id="send_button" class="btn btn-primary mt-3">Send →</button>
         
-    </div>
-    <div class="container p-5 shadow">
-        <h1 class="fw-bold">Students</h1>
-        <table class="table" id="datatable">
-            <thead>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Batch</th>
-                <th>Grade</th>
-            </thead>
-            <tbody id="tableArea">
-                
-            </tbody>
-        </table>
-    </div>
+    </main>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
+        import { getFirestore, collection, onSnapshot, addDoc, orderBy, query, Timestamp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
         // TODO: Add SDKs for Firebase products that you want to use
         // https://firebase.google.com/docs/web/setup#available-libraries
       
         // Your web app's Firebase configuration
         // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-          apiKey: "AIzaSyCY58ltu6EpqDw31z-0YhOoU4Kgt8tUrpQ",
-          authDomain: "studentrecords-efc70.firebaseapp.com",
-          projectId: "studentrecords-efc70",
-          storageBucket: "studentrecords-efc70.appspot.com",
-          messagingSenderId: "561287654338",
-          appId: "1:561287654338:web:694600eae3acec3fa2c45b",
-          measurementId: "G-R704YJPS2Q"
+            apiKey: "AIzaSyCazmU5jJGzr72smMa5x3e35y9_zwA5dRY",
+            authDomain: "groupchat-e9df9.firebaseapp.com",
+            projectId: "groupchat-e9df9",
+            storageBucket: "groupchat-e9df9.appspot.com",
+            messagingSenderId: "1003161262695",
+            appId: "1:1003161262695:web:d6d5ae20d2678352c952c2"
         };
       
         // Initialize Firebase
@@ -64,37 +56,62 @@
         // Initialize Cloud Firestore and get a reference to the service
         const db = getFirestore(app);
 
-        onSnapshot(query(collection(db, "students"), orderBy("lastname", "asc")), snapshot => {
-            document.querySelector("#tableArea").innerHTML = "";
-            snapshot.forEach(student =>{
-                let studentRow =
-                `<tr>
-                    <td>${student.data().firstname}</td>
-                    <td>${student.data().lastname}</td>
-                    <td>${student.data().batch}</td>
-                    <td>${student.data().grade}</td>
-                </tr>`;
-                document.querySelector("#tableArea").innerHTML += studentRow;
-            })
+
+        // Send new message
+        document.querySelector("#send_button").addEventListener("click", () => {
+            if(document.querySelector("#user_name").value !== "" && document.querySelector("#message_content").value !== ""){
+                addDoc(collection(db, "messages"), {
+                    sender: document.querySelector("#user_name").value,
+                    message: document.querySelector("#message_content").value,
+                    timestamp: Timestamp.fromDate(new Date())
+                });
+                document.querySelector("#message_content").value = "";
+            }else{
+                alert("Some fields are empty!");
+            }
         });
 
-        document.querySelector("#newStudentForm").addEventListener("click", () => {
+        onSnapshot(query(collection(db, "messages"), orderBy("timestamp", "asc")), snapshot => {
+            document.querySelector("#message_area").innerHTML = "";
+            snapshot.forEach(message =>{
 
-            addDoc(collection(db, "students"), {
-                firstname: document.querySelector("#firstname").value,
-                lastname: document.querySelector("#lastname").value,
-                batch: document.querySelector("#batch").value,
-                grade: document.querySelector("#grade").value,
+                if(message.data().sender === document.querySelector("#user_name").value){
+                    document.querySelector("#message_area").innerHTML +=
+                    `
+                    <div class="row mb-2">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="alert bg-light mb-0">
+                                <small class="fw-bold">${message.data().sender}</small>
+                                <br>
+                                <span>${message.data().message}</span>
+                            </div>
+                            <small class="text-secondary">${message.data().timestamp.toDate().toLocaleTimeString('en-US')}</small>
+                        </div>
+                    </div>
+                    
+                    `;
+                }else{
+                    document.querySelector("#message_area").innerHTML +=
+                    `
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <div class="alert bg-primary text-white mb-0">
+                                <small class="fw-bold">${message.data().sender}</small>
+                                <br>
+                                <span>${message.data().message}</span>
+                            </div>
+                            <small class="text-secondary float-end">${message.data().timestamp.toDate().toLocaleTimeString('en-US')}</small>
+                        </div>
+                    </div>
+                    
+                    `;
+                }
+
+                
             });
 
-            // Clear the values
-            document.querySelector("#firstname").value = "";
-            document.querySelector("#lastname").value = "";
-            document.querySelector("#batch").value = "";
-            document.querySelector("#grade").value = "";
-
+            document.querySelector("#message_area").scrollIntoView(false);
         });
-
         
       </script>
 </body>
